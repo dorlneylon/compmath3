@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" type="text/css" href="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css" />
+  <script type="text/javascript" src="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraphcore.js"></script>
+  <title>COMPMATH AAAA</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <div id="board" style="width:600px; height:300px;"></div>
+  <script>
+    let board = JXG.JSXGraph.initBoard('board', { axis: true, showCopyright: false });
+    document.getElementById('board').style.display = 'none';
+  </script>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

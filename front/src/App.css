@@ -1,0 +1,67 @@
+.logo.vite:hover {
+  filter: drop-shadow(0 0 2em #747bff);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafb);
+}
+
+button {
+  margin: 5px;
+}
+
+#board {
+  margin-left: 30%;
+}
+
+/* input {
+  margin: 10px;
+  placeholder-color: #f6f6f6;
+  color: #f6f6f6;
+} */
+
+table {
+  margin-top: 3%;
+  width: 100%;
+}
+
+#j-no {
+  max-width: 7px;
+}
+
+#j-N {
+  max-width: 10px;
+}
+
+#j-eps {
+  max-width: 20px;
+}
+
+#j-acc {
+  max-width: 20px;
+}
+
+#j-iter {
+  min-width: 10px;
+}
+
+#j-ans {
+  min-width: 40px;
+}
+
+table,
+th,
+td {
+  border-color: #717171;
+  border-collapse: collapse;
+  border: 1px solid;
+}
+
+/* textarea {
+  font-family: "Andale Mono", Inter, Avenir, Helvetica, Arial;
+  margin: 10px;
+  background-color: #1c1c1c;
+  color: #f6f6f6;
+  width: 80%;
+  font-size: 15px;
+} */
