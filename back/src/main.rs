@@ -3,7 +3,7 @@
 use crate::core::models;
 use axum::routing::post;
 use axum::{Json, Router};
-use core::eq_solver::Task;
+use core::eq_solver::Method;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 
@@ -20,45 +20,59 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn match_op(cat: usize) -> Task {
+async fn match_op(cat: usize) -> (fn(f32) -> f32, Vec<f32>) {
     match cat {
-        0 => Task::Eq(|x| x * x * x - x + 4.0),
-        1 => Task::Eq(|x| x.sin()),
-        2 => Task::Eq(|x| 12.0 / 11.0 * x - 1.0 / 11.0 * x * x * x - 4.0 / 11.0),
-        3 => Task::Sys((
-            |x, y| 0.3 - 0.1 * x * x - 0.2 * y * y,
-            |x, y| 0.7 - 0.2 * x * x - 0.1 * x * y,
-        )),
-        4 => Task::Sys((|x, y| (y + 2.0).sin() - 1.5, |x, y| 0.5 - (x - 2.0).cos())),
+        0 => (|x| x.powi(3) / 3.0, vec![]),
+        1 => (|x| -x.cos(), vec![]),
+        2 => (|x| x.exp(), vec![]),
+        3 => (|x| x.ln(), vec![0.0]),
+        4 => (|x| 0.5 * ((1.0 - x).ln() - (x + 1.0).ln()), vec![-1.0, 1.0]),
         _ => unreachable!(),
     }
 }
 
 async fn match_method(method: usize) -> core::eq_solver::Method {
     match method {
-        0 => core::eq_solver::Method::Chords,
-        1 => core::eq_solver::Method::Secants,
-        2 => core::eq_solver::Method::SimpleIt,
+        0 => Method::LeftRect,
+        1 => Method::RightRect,
+        2 => Method::MidRect,
+        3 => Method::Trap,
+        4 => Method::Simpson,
         _ => unreachable!(),
     }
 }
 
 async fn handler(Json(buf): Json<models::Request>) -> Json<models::Response> {
     let request = buf;
+    println!("{:?}", request);
+    let (task, mut bounds) = match_op(request.category).await;
+    bounds.push(request.lb);
+    bounds.push(request.rb);
+    bounds.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
-    let solver = core::eq_solver::Solver::new(
-        match_op(request.category).await,
+    let solver = core::eq_solver::Solver::New(
+        task,
         match_method(request.method).await,
-        100,
+        request.N,
         request.eps,
         request.lb,
         request.rb,
+        bounds,
     );
 
+    let mut last = 0.0;
+    let mut res = solver.solve();
+
+    while (res - last).abs() >= request.eps {
+        solver.n.set(solver.n.get() * 2);
+        last = res;
+        res = solver.solve();
+    }
+
     let response = models::Response {
-        x: solver.solve(),
-        acc: solver.acc.take(),
-        iters: solver.iters.take(),
+        x: res,
+        N: solver.n.get(),
+        acc: (last - res).abs(),
         errors: solver.errors.take(),
     };
 
